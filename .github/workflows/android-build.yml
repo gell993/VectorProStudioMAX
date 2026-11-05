@@ -4,8 +4,7 @@ name: Build VectorPro Studio MAX APK
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
@@ -15,13 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
-      
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -30,21 +27,15 @@ jobs:
 
       - name: Extract source code
         run: |
-          mkdir source
-          unzip -q VectorProStudio-MAX-CloudBuild.zip -d source
-          PROJECT_DIR=$(dirname "$(find source -name settings.gradle.kts -print -quit)")
-          test -n "$PROJECT_DIR"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          unzip -o VectorProStudio-MAX-CloudBuild-FIXED.zip -d .
 
       - name: Build Android APK
         run: |
-          gradle -p "$PROJECT_DIR" --no-daemon :app:assembleDebug
-          mkdir -p dist
-          cp "$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk" dist/VectorProStudioMAX.apk
+          gradle -p VectorProStudio-Max --no-daemon :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: VectorPro-Studio-MAX-APK
-          path: dist/VectorProStudioMAX.apk
+          path: VectorProStudio-Max/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
